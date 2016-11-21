@@ -6,6 +6,8 @@ import (
     "net/http"
     "errors"
     "github.com/serenize/snaker"
+    "unicode"
+    "unicode/utf8"
     "fmt"
 )
 
@@ -46,12 +48,23 @@ func ToJson(i interface{}) (interface{}, error) {
         return ToJson(writer.ToJson())
     }
     
+    marshaler, ok := i.(json.Marshaler)
+    
+    if ok {
+        return marshaler, nil
+    }
+    
     switch t.Kind() {
         case reflect.Struct:
             x := make(map[string]interface{})
             
             for idx := 0; idx < t.NumField(); idx++ {
                 def := t.Field(idx)
+                runeValue, _ := utf8.DecodeRuneInString(def.Name)
+                if !unicode.IsUpper(runeValue) {
+                    continue
+                }
+                
                 val := value.Field(idx)
                 
                 res, err := ToJson(val.Interface())

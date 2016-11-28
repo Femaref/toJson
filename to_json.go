@@ -64,7 +64,6 @@ func ToJson(i interface{}) (interface{}, error) {
 	}
 	
 	errorer, ok := i.(error)
-	
 	if ok {
 	    if Debug {
 			fmt.Printf("Processing %T with Error()\n", i)
@@ -104,9 +103,8 @@ func ToJson(i interface{}) (interface{}, error) {
 			fmt.Printf("Processing %T as Map\n", i)
 		}
 		input, ok := i.(map[string]interface{})
-
+        x := make(map[string]interface{})
 		if ok {
-			x := make(map[string]interface{})
 			for key, value := range input {
 				x[key], err = ToJson(value)
 
@@ -114,10 +112,21 @@ func ToJson(i interface{}) (interface{}, error) {
 					return nil, err
 				}
 			}
-
-			return x, nil
+		} else {
+		    keys := value.MapKeys()
+		    
+		    
+		    for _, key := range keys {
+		        keyval := value.MapIndex(key)
+		        x[fmt.Sprintf("%v", key.Interface())], err = ToJson(keyval.Interface())
+		        
+		        if err != nil {
+		            return nil, err
+		        }
+		    }
 		}
-		return nil, UnsupportedDatatype
+		
+		return x, nil
 	case reflect.Slice:
 		if Debug {
 			fmt.Printf("Processing %T as Slice\n", i)
@@ -139,8 +148,6 @@ func ToJson(i interface{}) (interface{}, error) {
 		}
 
 		return ToJson(reflect.Indirect(value).Interface())
-
-		return i, nil
 	default:
 		if Debug {
 			fmt.Printf("Processing %T as default\n", i)

@@ -15,6 +15,8 @@ type jsonWriter interface {
 	ToJson() interface{}
 }
 
+type JsonWriter jsonWriter
+
 var Debug bool = false
 
 var UnsupportedDatatype = errors.New("Unsupported Datatype")
@@ -59,6 +61,16 @@ func ToJson(i interface{}) (interface{}, error) {
 			fmt.Printf("Processing %T with MarshalJson()\n", i)
 		}
 		return marshaler, nil
+	}
+	
+	errorer, ok := i.(error)
+	
+	if ok {
+	    if Debug {
+			fmt.Printf("Processing %T with Error()\n", i)
+		}
+		
+		return errorer.Error(), nil
 	}
 
 	switch t.Kind() {

@@ -19,6 +19,7 @@ type JsonWriter jsonWriter
 
 var Debug bool = false
 
+var TypeError = errors.New("Could not get type")
 var UnsupportedDatatype = errors.New("Unsupported Datatype")
 var ReflectTypeError = errors.New("Got passed reflect.Type")
 var ReflectValueError = errors.New("Got passed reflect.Value")
@@ -40,7 +41,7 @@ func ToJson(i interface{}) (interface{}, error) {
 	t := reflect.TypeOf(i)
 
 	if t == nil {
-		return nil, nil
+		return nil, TypeError
 	}
 
 	value := reflect.ValueOf(i)

@@ -41,7 +41,7 @@ func ToJson(i interface{}) (interface{}, error) {
 	t := reflect.TypeOf(i)
 
 	if t == nil {
-		return nil, TypeError
+		return nil, nil
 	}
 
 	value := reflect.ValueOf(i)

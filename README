@@ -1,0 +1,13 @@
+Simple helper to write json representations of structs to a http response.
+
+In essence, the toJson.ToJson Method converts whatever interface is provided to a representation based
+entirely on Slices/Maps/Primitive types.
+
+If type implements the JsonWriter interface, the output of it is used instead of the normal algorithm.
+
+Normal usage is
+
+    err := toJson.WriteToJson(w, obj)
+
+
+If you already have a marshable datatype, you can use toJson.WriteJson directly.

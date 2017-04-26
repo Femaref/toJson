@@ -7,8 +7,7 @@ import (
 	"github.com/serenize/snaker"
 	"net/http"
 	"reflect"
-	"unicode"
-	"unicode/utf8"
+	"strings"
 )
 
 type jsonWriter interface {
@@ -26,7 +25,7 @@ var ReflectValueError = errors.New("Got passed reflect.Value")
 
 func fieldName(field reflect.StructField) (name string) {
 	value := field.Tag.Get("json")
-	fields = strings.Split(value, ",")
+	fields := strings.Split(value, ",")
 
 	// The format of the json tag is "<field>,<options>", with fields possibly being
 	// empty

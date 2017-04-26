@@ -24,6 +24,19 @@ var UnsupportedDatatype = errors.New("Unsupported Datatype")
 var ReflectTypeError = errors.New("Got passed reflect.Type")
 var ReflectValueError = errors.New("Got passed reflect.Value")
 
+func fieldName(field reflect.StructField) (name string) {
+	value := field.Tag.Get("json")
+	fields = strings.Split(value, ",")
+
+	// The format of the json tag is "<field>,<options>", with fields possibly being
+	// empty
+	if len(fields) > 0 {
+		return fields[0]
+	}
+
+	return snaker.CamelToSnake(field.Name)
+}
+
 func ToJson(i interface{}) (interface{}, error) {
 	var err error
 
@@ -82,12 +95,12 @@ func ToJson(i interface{}) (interface{}, error) {
 
 		for idx := 0; idx < t.NumField(); idx++ {
 			def := t.Field(idx)
-			runeValue, _ := utf8.DecodeRuneInString(def.Name)
-			if !unicode.IsUpper(runeValue) {
+			val := value.Field(idx)
+
+			// do not try and render unexported fields
+			if !val.CanInterface() {
 				continue
 			}
-
-			val := value.Field(idx)
 
 			res, err := ToJson(val.Interface())
 
@@ -95,7 +108,9 @@ func ToJson(i interface{}) (interface{}, error) {
 				return nil, err
 			}
 
-			x[snaker.CamelToSnake(def.Name)] = res
+			name := fieldName(def)
+
+			x[name] = res
 		}
 
 		return x, nil

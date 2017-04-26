@@ -76,13 +76,13 @@ func ToJson(i interface{}) (interface{}, error) {
 		}
 		return marshaler, nil
 	}
-	
+
 	errorer, ok := i.(error)
 	if ok {
-	    if Debug {
+		if Debug {
 			fmt.Printf("Processing %T with Error()\n", i)
 		}
-		
+
 		return errorer.Error(), nil
 	}
 
@@ -119,7 +119,7 @@ func ToJson(i interface{}) (interface{}, error) {
 			fmt.Printf("Processing %T as Map\n", i)
 		}
 		input, ok := i.(map[string]interface{})
-        x := make(map[string]interface{})
+		x := make(map[string]interface{})
 		if ok {
 			for key, value := range input {
 				x[key], err = ToJson(value)
@@ -129,19 +129,18 @@ func ToJson(i interface{}) (interface{}, error) {
 				}
 			}
 		} else {
-		    keys := value.MapKeys()
-		    
-		    
-		    for _, key := range keys {
-		        keyval := value.MapIndex(key)
-		        x[fmt.Sprintf("%v", key.Interface())], err = ToJson(keyval.Interface())
-		        
-		        if err != nil {
-		            return nil, err
-		        }
-		    }
+			keys := value.MapKeys()
+
+			for _, key := range keys {
+				keyval := value.MapIndex(key)
+				x[fmt.Sprintf("%v", key.Interface())], err = ToJson(keyval.Interface())
+
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
-		
+
 		return x, nil
 	case reflect.Slice:
 		if Debug {

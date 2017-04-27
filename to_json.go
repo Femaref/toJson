@@ -29,7 +29,7 @@ func fieldName(field reflect.StructField) (name string) {
 
 	// The format of the json tag is "<field>,<options>", with fields possibly being
 	// empty
-	if len(fields) > 0 {
+	if len(fields) > 0 && fields[0] != "" {
 		return fields[0]
 	}
 

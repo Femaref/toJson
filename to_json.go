@@ -179,7 +179,7 @@ func WriteToJson(w http.ResponseWriter, obj interface{}) error {
 }
 
 func WriteJson(w http.ResponseWriter, obj interface{}) error {
-	w.Header().Add("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	marshalled, err := json.MarshalIndent(map[string]interface{}{"result": obj}, "", "  ")
 	if err != nil {
 		return err

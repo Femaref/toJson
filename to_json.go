@@ -175,12 +175,24 @@ func WriteToJson(w http.ResponseWriter, obj interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	wrapped := map[string]interface{}{"result": o}
+
+	return WriteJson(w, &wrapped)
+}
+
+func WriteToJsonNotWrapped(w http.ResponseWriter, obj interface{}) error {
+	o, err := ToJson(obj)
+	if err != nil {
+		return err
+	}
+
 	return WriteJson(w, &o)
 }
 
 func WriteJson(w http.ResponseWriter, obj interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
-	marshalled, err := json.MarshalIndent(map[string]interface{}{"result": obj}, "", "  ")
+	marshalled, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
 		return err
 	}

@@ -161,6 +161,10 @@ func ToJson(i interface{}) (interface{}, error) {
 			fmt.Printf("Processing %T as Pointer\n", i)
 		}
 
+		if !value.IsValid() || value.IsNil() {
+			return nil, nil
+		}
+
 		return ToJson(reflect.Indirect(value).Interface())
 	default:
 		if Debug {

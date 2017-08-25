@@ -145,14 +145,14 @@ func ToJson(i interface{}) (interface{}, error) {
 		if Debug {
 			fmt.Printf("Processing %T as Slice\n", i)
 		}
-		var x []interface{} = make([]interface{}, 0)
+		var x []interface{} = make([]interface{}, value.Len())
 		for idx := 0; idx < value.Len(); idx++ {
 			v := value.Index(idx)
 			o, err := ToJson(v.Interface())
 			if err != nil {
 				return nil, err
 			}
-			x = append(x, o)
+			x[idx] = o
 		}
 
 		return x, nil

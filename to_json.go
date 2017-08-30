@@ -8,7 +8,17 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
+
+var Logger *logrus.Logger
+
+func writeError(err error) {
+	if Logger != nil {
+		Logger.Error(err)
+	}
+}
 
 type jsonWriter interface {
 	ToJson() interface{}
@@ -177,6 +187,7 @@ func ToJson(i interface{}) (interface{}, error) {
 func WriteToJson(w http.ResponseWriter, obj interface{}) error {
 	o, err := ToJson(obj)
 	if err != nil {
+		writeError(err)
 		return err
 	}
 
@@ -188,6 +199,7 @@ func WriteToJson(w http.ResponseWriter, obj interface{}) error {
 func WriteToJsonNotWrapped(w http.ResponseWriter, obj interface{}) error {
 	o, err := ToJson(obj)
 	if err != nil {
+		writeError(err)
 		return err
 	}
 
@@ -198,6 +210,7 @@ func WriteJson(w http.ResponseWriter, obj interface{}) error {
 	w.Header().Set("Content-Type", "application/json")
 	marshalled, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
+		writeError(err)
 		return err
 	}
 	w.Write([]byte(fmt.Sprintf("%s\n", marshalled)))

@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/serenize/snaker"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"github.com/serenize/snaker"
 
 	"github.com/sirupsen/logrus"
 )
@@ -33,17 +34,54 @@ var UnsupportedDatatype = errors.New("Unsupported Datatype")
 var ReflectTypeError = errors.New("Got passed reflect.Type")
 var ReflectValueError = errors.New("Got passed reflect.Value")
 
-func fieldName(field reflect.StructField) (name string) {
+type props struct {
+	Name      string
+	Omitempty bool
+	Omit      bool
+}
+
+func fieldProperties(field reflect.StructField) props {
 	value := field.Tag.Get("json")
 	fields := strings.Split(value, ",")
 
 	// The format of the json tag is "<field>,<options>", with fields possibly being
 	// empty
-	if len(fields) > 0 && fields[0] != "" {
-		return fields[0]
-	}
+	if value != "" {
+		name := fields[0]
+		opts := fields[1:]
+		p := props{
+			Name: name,
+			Omit: name == "-",
+		}
 
-	return snaker.CamelToSnake(field.Name)
+		for _, opt := range opts {
+			if opt == "omitempty" {
+				p.Omitempty = true
+			}
+		}
+
+		return p
+	}
+	return props{Name: snaker.CamelToSnake(field.Name)}
+}
+
+// copied from encoding/json
+func isEmptyValue(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool:
+		return !v.Bool()
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return v.Int() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+		return v.Uint() == 0
+	case reflect.Float32, reflect.Float64:
+		return v.Float() == 0
+	case reflect.Interface, reflect.Ptr:
+		return v.IsNil()
+	}
+	return false
 }
 
 func ToJson(i interface{}) (interface{}, error) {
@@ -111,15 +149,20 @@ func ToJson(i interface{}) (interface{}, error) {
 				continue
 			}
 
+			p := fieldProperties(def)
+
+			// same behaviour as encoding/json
+			if p.Omit || (p.Omitempty && isEmptyValue(val)) {
+				continue
+			}
+
 			res, err := ToJson(val.Interface())
 
 			if err != nil {
 				return nil, err
 			}
 
-			name := fieldName(def)
-
-			x[name] = res
+			x[p.Name] = res
 		}
 
 		return x, nil

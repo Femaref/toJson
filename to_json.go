@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
 
@@ -225,38 +224,4 @@ func ToJson(i interface{}) (interface{}, error) {
 		}
 		return i, nil
 	}
-}
-
-func WriteToJson(w http.ResponseWriter, obj interface{}) error {
-	o, err := ToJson(obj)
-	if err != nil {
-		writeError(err)
-		return err
-	}
-
-	wrapped := map[string]interface{}{"result": o}
-
-	return WriteJson(w, &wrapped)
-}
-
-func WriteToJsonNotWrapped(w http.ResponseWriter, obj interface{}) error {
-	o, err := ToJson(obj)
-	if err != nil {
-		writeError(err)
-		return err
-	}
-
-	return WriteJson(w, &o)
-}
-
-func WriteJson(w http.ResponseWriter, obj interface{}) error {
-	w.Header().Set("Content-Type", "application/json")
-	marshalled, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		writeError(err)
-		return err
-	}
-	w.Write([]byte(fmt.Sprintf("%s\n", marshalled)))
-
-	return nil
 }

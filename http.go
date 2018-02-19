@@ -44,7 +44,7 @@ func WriteJson(w http.ResponseWriter, obj interface{}, code int) error {
 	}
 
 	data := []byte(fmt.Sprintf("%s\n", marshalled))
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Content-Length", fmt.Sprint(len(data)))
 	w.WriteHeader(code)
 	w.Write(data)
